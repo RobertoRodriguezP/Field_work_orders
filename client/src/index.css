@@ -1,0 +1,232 @@
+/* ===== Reset & base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  height: 100%;
+  overflow: hidden;            /* ⛔️ sin scroll global */
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: #0a0a0a;         /* mantén tu tema, cámbialo si no usas dark */
+  color: #797676;
+}
+
+/* Vite boilerplate off (si existía) */
+body {
+  /* display: flex; */
+  /* place-items: center; */
+}
+#root {
+  /* max-width: 1280px; margin: 0 auto; padding: 2rem; text-align: center; */
+  width: 100%;
+  display: flex;
+  flex-direction: column;      /* header (si hay) + contenido */
+  min-height: 100%;
+}
+
+/* ===== Layout genérico ===== */
+main, .app-main, .container-fluid {
+  flex: 1 1 auto;              /* ocupa todo el resto del alto */
+  min-height: 0;               /* clave para permitir scroll interno */
+  overflow: hidden;            /* nada de overflow fuera; adentro sí */
+}
+
+/* Cards/Tablas no causen overflow lateral */
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+table { width: 100%; }
+
+/* ===== Utilidades ===== */
+.text-truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Botones full en móvil cuando sea útil */
+@media (max-width: 767.98px) {
+  .w-100-sm { width: 100% !important; }
+}
+
+/* ===== Grid maestro para páginas tipo TasksPage =====
+   Detecta el wrapper .d-grid.gap-3 (Bootstrap) y lo convierte
+   en una grilla de 3 filas: filtros (auto), contenido (1fr), paginación (auto)
+   SOLO cuando dentro hay .kanban o una .table (evita tocar otras pantallas)
+*/
+.d-grid.gap-3:has(.kanban),
+.d-grid.gap-3:has(table) {
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto 1fr auto; /* filtros, contenido, paginación */
+}
+
+/* La tarjeta de filtros nunca debe crecer */
+.d-grid.gap-3:has(.kanban) > .card:first-child,
+.d-grid.gap-3:has(table)   > .card:first-child {
+  overflow: visible;
+}
+
+/* El contenedor del board/tabla debe ocupar y scrollear internamente */
+.d-grid.gap-3:has(.kanban) > .kanban,
+.d-grid.gap-3:has(table)   > .card:nth-child(2),
+.d-grid.gap-3:has(table)   > .card:nth-child(2) .card-body {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Dentro de la tabla, el scroll va en el body */
+.table-responsive {
+  max-height: 100%;
+  overflow: auto;
+}
+
+/* ===== Kanban ===== */
+.kanban {
+  height: 100%;                /* ocupa toda la fila "contenido" */
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr;  /* móvil: 1 col */
+  gap: 12px;
+  overflow: hidden;            /* el scroll va en las columnas */
+}
+
+@media (min-width: 768px) {
+  .kanban {
+    grid-template-columns: repeat(3, 1fr); /* md+: 3 cols */
+  }
+}
+
+/* Columna: header fijo, body con scroll propio */
+.kanban-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;               /* permite que el body calcule su alto */
+}
+
+.kanban-col > .card-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: inherit;         /* mantiene color del card */
+}
+
+.kanban-col > .card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;              /* 👈 aquí está el scroll del contenido */
+  padding: 8px;
+}
+
+/* Feedback al arrastrar encima de una columna (opcional) */
+.kanban-col.drag-over,
+.kanban-col:hover {
+  outline: 2px dashed rgba(100,108,255,.45);
+  outline-offset: -6px;
+}
+
+/* Cards compactas para board */
+.kanban .card {
+  background: #111;
+  border-color: #2a2a2a;
+}
+.kanban .card .card-body {
+  padding: 10px;
+}
+
+/* ===== Modales ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.5);
+  z-index: 1050;
+}
+.modal .modal-dialog {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal .modal-content {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal .modal-body {
+  overflow: auto;
+}
+
+/* ===== Helpers para tema oscuro Bootstrap-like (opcional) ===== */
+.card {
+  background-color: #0f0f0f;
+  border: 1px solid #262626;
+  color: #eaeaea;
+}
+.card .card-header {
+  background-color: #101010;
+  border-bottom-color: #262626;
+}
+.alert-info {
+  background: #0b243a;
+  border-color: #114a7c;
+  color: #cfe9ff;
+}
+.alert-danger {
+  background: #3a0b0b;
+  border-color: #7c1111;
+  color: #ffd4d4;
+}
+.badge.text-bg-secondary { background: #323232 !important; }
+.badge.text-bg-warning   { background: #5a4a00 !important; color: #ffe599 !important; }
+.badge.text-bg-success   { background: #0f3f1a !important; color: #b7f7c0 !important; }
+
+/* ===== Scrollbars bonitos (opcional) ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d3d transparent;
+}
+*::-webkit-scrollbar { height: 8px; width: 8px; }
+*::-webkit-scrollbar-thumb { background: #3d3d3d; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+.offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background: #3a0b0b;
+  border-bottom: 1px solid #7c1111;
+  color: #ffd4d4;
+}
+.offline-banner__content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+.offline-banner .sep { opacity: .6; }

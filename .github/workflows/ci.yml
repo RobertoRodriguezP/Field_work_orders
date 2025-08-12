@@ -1,0 +1,25 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: workops
+          POSTGRES_PASSWORD: workops
+          POSTGRES_DB: workops
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U workops -d workops"
+          --health-interval=5s --health-timeout=3s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+      - name: Restore & Test
+        working-directory: api
+        run: |
+          dotnet restore ./src/Api/Api.csproj
+          dotnet test ./tests/Api.Tests.csproj --no-restore --verbosity normal
