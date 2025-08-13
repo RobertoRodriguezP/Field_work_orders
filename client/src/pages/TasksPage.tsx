@@ -73,14 +73,14 @@ export default function TasksPage() {
   };
 
   const onDropToColumn = async (e: React.DragEvent, status: TaskStatus) => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData('text/taskId');
-    if (!taskId || !page) return;
-    const t = page.items.find(x => x.id === taskId);
-    if (!t || t.status === status) return;
-    await update(taskId, { status });
-    refresh();
-  };
+  e.preventDefault();
+  const taskId = e.dataTransfer.getData('text/taskId');
+  if (!taskId || !page) return;
+  const t = page.items.find(x => x.id === taskId);
+  if (!t || t.status === status) return; 
+  await update(taskId, { status });
+
+};
 
   const TaskCard = ({ t }: { t: Task }) => (
     <div
@@ -112,19 +112,12 @@ export default function TasksPage() {
               setEditing(t);
               setShowForm(true);
               reset({
-  title: t.title,
-  description: undef(t.description),
-  dueDate: undef(t.dueDate?.slice(0,10)),
-  status: t.status,
-  assignedTo: undef(t.assignedTo),
-});
-               //reset({
-               // title: t.title,
-               // description: t.description ?? undefined,
-               // dueDate: t.dueDate?.slice(0, 10) ?? undefined,
-               // status: t.status,
-               // assignedTo: t.assignedTo ?? undefined
-              //});
+                  title: t.title,
+                  description: undef(t.description),
+                  dueDate: undef(t.dueDate?.slice(0,10)),
+                  status: t.status,
+                  assignedTo: undef(t.assignedTo),
+                });
             }}
           >
             Edit
@@ -277,19 +270,12 @@ export default function TasksPage() {
                             setEditing(t);
                             setShowForm(true);
                             reset({
-  title: t.title,
-  description: undef(t.description),
-  dueDate: undef(t.dueDate?.slice(0,10)),
-  status: t.status,
-  assignedTo: undef(t.assignedTo),
-});
-                           //reset({
-                           // title: t.title,
-                           // description: t.description ?? undefined,
-                           // dueDate: t.dueDate?.slice(0, 10) ?? undefined,
-                           // status: t.status,
-                           // assignedTo: t.assignedTo ?? undefined
-                            //});
+                                    title: t.title,
+                                    description: undef(t.description),
+                                    dueDate: undef(t.dueDate?.slice(0,10)),
+                                    status: t.status,
+                                    assignedTo: undef(t.assignedTo),
+                                  });
                           }}
                         >
                           Edit

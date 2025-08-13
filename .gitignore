@@ -1,0 +1,124 @@
+# --------------------------------------
+# Node / React (frontend)
+# --------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# IDE / Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+*.log
+logs/
+debug.log
+error.log
+
+# --------------------------------------
+# .NET / C# (si backend en Azure Functions o API .NET)
+# --------------------------------------
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.csproj.user
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Visual Studio cache/options
+.vs/
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*_i.asm
+*_p.asm
+*.cachefile
+*.dbmdl
+
+# Azure Functions local settings
+local.settings.json
+
+# --------------------------------------
+# Python (si usas scripts/ETL)
+# --------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --------------------------------------
+# Docker
+# --------------------------------------
+# Persisted volumes
+pg_data/
+**/pg_data/
+
+# Build cache
+**/.docker-compose
+**/.docker
+**/docker-compose.override.yml
+
+# --------------------------------------
+# Sistema operativo
+# --------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# --------------------------------------
+# Tests / Coverage
+# --------------------------------------
+coverage/
+*.lcov
+.nyc_output/

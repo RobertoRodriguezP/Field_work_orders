@@ -1,13 +1,13 @@
 export type TaskStatus = 'Pending' | 'In Progress' | 'Done';
 
 export interface Task {
-  id: string;                 // normalizamos a string, aunque el backend use int
+  id: string;                 
   title: string;
   description?: string | null;
-  dueDate?: string | null;    // ISO date o 'YYYY-MM-DD'
+  dueDate?: string | null;    
   status: TaskStatus;
-  createdBy?: string | null;  // opcional (mapeamos createdBySub)
-  assignedTo?: string | null; // opcional (mapeamos assignedToSub)
+  createdBy?: string | null;  
+  assignedTo?: string | null; 
   createdAt?: string | null;
   updatedAt?: string | null;
 }
@@ -20,7 +20,7 @@ export interface Paged<T> {
 }
 
 export interface TaskFilters {
-  q?: string;           // hoy el backend no filtra q/sort; los conservamos por UI
+  q?: string;           
   status?: TaskStatus | 'All';
   sort?: string;
   page?: number;

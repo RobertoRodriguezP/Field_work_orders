@@ -26,8 +26,6 @@ export default function RegisterPage() {
     setSubmitting(true);
     setServerMsg(null);
     try {
-      // Contrato esperado: POST /api/auth/register { email, firstName, lastName }
-      // Backend C# crea el usuario en Keycloak o inicia flujo de invitación
       const res = await api.post('/api/auth/register', data);
       setServerMsg(res?.data?.message || 'Cuenta creada. Revisa tu correo o continúa con Login.');
       reset();
@@ -41,7 +39,6 @@ export default function RegisterPage() {
 
   const continueWithGoogle = () => {
     if (!apiOnline) return;
-    // El backend C# maneja Keycloak y redirige
     window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/login?provider=google&prompt=consent`;
   };
 

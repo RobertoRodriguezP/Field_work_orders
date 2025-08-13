@@ -38,9 +38,13 @@ export default function App() {
               <button className="btn btn-sm btn-outline-secondary" onClick={logout}>Logout</button>
             </>
           ) : (
-            <button className="btn btn-sm btn-outline-secondary" onClick={login} disabled={!apiOnline}>
+            <Link
+              className={`btn btn-sm btn-outline-secondary ${!apiOnline ? 'disabled' : ''}`}
+              to="/login"
+              aria-disabled={!apiOnline}
+            >
               {apiOnline ? 'Login (Keycloak vía C#)' : 'Login deshabilitado'}
-            </button>
+            </Link>
           )}
         </div>
       </header>

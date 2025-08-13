@@ -6,22 +6,34 @@ import type { Paged, Task, TaskFilters, TaskStatus } from "../types";
 
 const LS_KEY = "offline_tasks";
 
+const toServerStatus = (s?: string | null): string | undefined => {
+  if (!s) return undefined;
+  return s === "In Progress" ? "InProgress" : s;
+};
+
+const toClientStatus = (s?: string | null): TaskStatus => {
+  if (s === "InProgress") return "In Progress";
+  if (s === "Pending" || s === "In Progress" || s === "Done") return s as TaskStatus;
+  return "Pending";
+};
+
 const mapServerToClient = (e: any): Task => ({
   id: String(e.id),
   title: e.title,
   description: e.description ?? null,
   dueDate: e.dueDate ?? null,
-  status: e.status,
+  status: toClientStatus(e.status),
   createdBy: e.createdBySub ?? null,
   assignedTo: e.assignedToSub ?? null,
   createdAt: e.createdAt ?? null,
   updatedAt: e.updatedAt ?? null,
 });
+
 const mapClientToServer = (t: Partial<Task>) => ({
   title: t.title,
   description: t.description ?? null,
   dueDate: t.dueDate ?? null,
-  status: t.status,
+  status: toServerStatus(t.status), 
   assignedToSub: t.assignedTo ?? null,
 });
 
@@ -69,6 +81,7 @@ const Ctx = createContext<TasksCtx>({} as any);
 const defaultFilters: TaskFilters = { status: "All", page: 1, pageSize: 12 };
 
 export function TasksProvider({ children }: { children: React.ReactNode }) {
+
   const { apiOnline } = useConnectivity();
   const [filters, _setFilters] = useState<TaskFilters>(defaultFilters);
   const [page, setPage] = useState<Paged<Task> | null>(null);
@@ -85,14 +98,21 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       const qs = buildQuery(filters);
-      const { data } = await api.get(`/api/tasks?${qs}`);
+      const token = localStorage.getItem("access_token");
+      console.log(token)
+      const { data } = await api.get(`/api/tasks?${qs}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
+      
+      
       const items: Task[] = (data.items ?? []).map(mapServerToClient);
       setPage({ items, total: data.total ?? items.length, page: filters.page ?? 1, pageSize: filters.pageSize ?? 12 });
-      // cache local de cortesía
       if (filters.page === 1 && (filters.status === "All" || !filters.status)) saveLocal(items);
     } catch (err: any) {
       const msg = toErrorMessage(err);
-      // Si es 401 → tratar como “guest”: usamos cache local para no bloquear UI
       if (err?.response?.status === 401) {
         const all = loadLocal();
         setPage(paginate(applyFilters(all, filters), filters));
@@ -114,9 +134,9 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { fetchPage(); }, [fetchPage]);
 
   const setFilters = (patch: Partial<TaskFilters>) => _setFilters(prev => ({ ...prev, ...patch }));
-  const refresh = () => fetchPage();
+  const refresh = useCallback(() => { fetchPage(); }, [fetchPage]);
 
-  const create = async (input: Partial<Task>) => {
+  const create = useCallback(async (input: Partial<Task>) => {
     if (!apiOnline) {
       const t: Task = {
         id: crypto.randomUUID(),
@@ -134,13 +154,23 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       return t;
     }
     try {
-      const { data } = await api.post(`/api/tasks`, mapClientToServer(input));
+      const token = localStorage.getItem("access_token");
+      
+      const { data } = await api.post(
+                      `/api/tasks`,
+                      mapClientToServer(input),
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        }
+                      }
+                    );
       const item = mapServerToClient(data);
       await fetchPage();
       return item;
     } catch (err: any) {
       if (err?.response?.status === 401) {
-        // guardamos localmente como guest
         const t: Task = {
           id: crypto.randomUUID(),
           title: input.title || "Untitled",
@@ -158,38 +188,48 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       }
       throw err;
     }
-  };
+  }, [apiOnline, fetchPage]);
 
-  const update = async (id: string, patch: Partial<Task>) => {
+  const update = useCallback(async (id: string, patch: Partial<Task>) => {
     if (!apiOnline) {
+    const all = loadLocal();
+    const idx = all.findIndex(t => t.id === id);
+    if (idx >= 0) {
+      all[idx] = { ...all[idx], ...patch, updatedAt: new Date().toISOString() };
+      saveLocal(all);
+      await fetchPage();
+    }
+    return;
+  }
+
+  setPage(prev => {
+    if (!prev) return prev;
+    const items = prev.items.map(t => t.id === id ? { ...t, ...patch } : t);
+    return { ...prev, items };
+  });
+    try {
+    const token = localStorage.getItem("access_token");
+    await api.put(`/api/tasks/${id}`, mapClientToServer(patch), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await fetchPage();
+  } catch (err: any) {
+    await fetchPage();
+    if (err?.response?.status === 401) {
       const all = loadLocal();
       const idx = all.findIndex(t => t.id === id);
       if (idx >= 0) {
         all[idx] = { ...all[idx], ...patch, updatedAt: new Date().toISOString() };
         saveLocal(all);
         await fetchPage();
+        return;
       }
-      return;
     }
-    try {
-      await api.put(`/api/tasks/${id}`, mapClientToServer(patch));
-    } catch (err: any) {
-      if (err?.response?.status === 401) {
-        // guest: actualiza local
-        const all = loadLocal();
-        const idx = all.findIndex(t => t.id === id);
-        if (idx >= 0) {
-          all[idx] = { ...all[idx], ...patch, updatedAt: new Date().toISOString() };
-          saveLocal(all);
-          await fetchPage();
-          return;
-        }
-      }
-      throw err;
-    }
-  };
+    throw err;
+  }
+  }, [apiOnline, fetchPage]);
 
-  const remove = async (id: string) => {
+  const remove = useCallback(async (id: string) => {
     if (!apiOnline) {
       const all = loadLocal().filter(t => t.id !== id);
       saveLocal(all);
@@ -197,11 +237,16 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
-      await api.delete(`/api/tasks/${id}`);
+      const token = localStorage.getItem("access_token");
+      
+      await api.delete(`/api/tasks/${id}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
       await fetchPage();
     } catch (err: any) {
       if (err?.response?.status === 401) {
-        // guest: borra local
         const all = loadLocal().filter(t => t.id !== id);
         saveLocal(all);
         await fetchPage();
@@ -209,14 +254,14 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       }
       throw err;
     }
-  };
+  }, [apiOnline, fetchPage]);
 
-  const value = useMemo(() => ({
+    const value = useMemo(() => ({
     page, loading, error,
     filters, setFilters, refresh,
     create, update, remove
-  }), [page, loading, error, filters]);
+  }), [page, loading, error, filters, refresh, create, update, remove]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
-export function useTasks() { return useContext(Ctx); }
+export const useTasks = () => useContext(Ctx);

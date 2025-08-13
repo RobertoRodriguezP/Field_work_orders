@@ -1,4 +1,4 @@
-/* ===== Reset & base ===== */
+
 *,
 *::before,
 *::after {
@@ -18,33 +18,29 @@ body {
   margin: 0;
   min-width: 320px;
   height: 100%;
-  overflow: hidden;            /* ⛔️ sin scroll global */
+  overflow: hidden;           
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  background: #0a0a0a;         /* mantén tu tema, cámbialo si no usas dark */
+  background: #0a0a0a;         
   color: #797676;
 }
 
-/* Vite boilerplate off (si existía) */
-body {
-  /* display: flex; */
-  /* place-items: center; */
-}
+
 #root {
-  /* max-width: 1280px; margin: 0 auto; padding: 2rem; text-align: center; */
+
   width: 100%;
   display: flex;
-  flex-direction: column;      /* header (si hay) + contenido */
+  flex-direction: column;      
   min-height: 100%;
 }
 
-/* ===== Layout genérico ===== */
+
 main, .app-main, .container-fluid {
-  flex: 1 1 auto;              /* ocupa todo el resto del alto */
-  min-height: 0;               /* clave para permitir scroll interno */
-  overflow: hidden;            /* nada de overflow fuera; adentro sí */
+  flex: 1 1 auto;              
+  min-height: 0;               
+  overflow: hidden;            
 }
 
-/* Cards/Tablas no causen overflow lateral */
+
 img, svg, video, canvas {
   max-width: 100%;
   height: auto;
@@ -52,7 +48,7 @@ img, svg, video, canvas {
 }
 table { width: 100%; }
 
-/* ===== Utilidades ===== */
+
 .text-truncate-1 {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -65,30 +61,26 @@ table { width: 100%; }
   overflow: hidden;
 }
 
-/* Botones full en móvil cuando sea útil */
+
 @media (max-width: 767.98px) {
   .w-100-sm { width: 100% !important; }
 }
 
-/* ===== Grid maestro para páginas tipo TasksPage =====
-   Detecta el wrapper .d-grid.gap-3 (Bootstrap) y lo convierte
-   en una grilla de 3 filas: filtros (auto), contenido (1fr), paginación (auto)
-   SOLO cuando dentro hay .kanban o una .table (evita tocar otras pantallas)
-*/
+
 .d-grid.gap-3:has(.kanban),
 .d-grid.gap-3:has(table) {
   height: 100%;
   min-height: 0;
-  grid-template-rows: auto 1fr auto; /* filtros, contenido, paginación */
+  grid-template-rows: auto 1fr auto; 
 }
 
-/* La tarjeta de filtros nunca debe crecer */
+
 .d-grid.gap-3:has(.kanban) > .card:first-child,
 .d-grid.gap-3:has(table)   > .card:first-child {
   overflow: visible;
 }
 
-/* El contenedor del board/tabla debe ocupar y scrollear internamente */
+
 .d-grid.gap-3:has(.kanban) > .kanban,
 .d-grid.gap-3:has(table)   > .card:nth-child(2),
 .d-grid.gap-3:has(table)   > .card:nth-child(2) .card-body {
@@ -96,57 +88,57 @@ table { width: 100%; }
   overflow: hidden;
 }
 
-/* Dentro de la tabla, el scroll va en el body */
+
 .table-responsive {
   max-height: 100%;
   overflow: auto;
 }
 
-/* ===== Kanban ===== */
+
 .kanban {
-  height: 100%;                /* ocupa toda la fila "contenido" */
+  height: 100%;                
   min-height: 0;
   display: grid;
-  grid-template-columns: 1fr;  /* móvil: 1 col */
+  grid-template-columns: 1fr;  
   gap: 12px;
-  overflow: hidden;            /* el scroll va en las columnas */
+  overflow: hidden;            
 }
 
 @media (min-width: 768px) {
   .kanban {
-    grid-template-columns: repeat(3, 1fr); /* md+: 3 cols */
+    grid-template-columns: repeat(3, 1fr); 
   }
 }
 
-/* Columna: header fijo, body con scroll propio */
+
 .kanban-col {
   display: flex;
   flex-direction: column;
-  min-height: 0;               /* permite que el body calcule su alto */
+  min-height: 0;               
 }
 
 .kanban-col > .card-header {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: inherit;         /* mantiene color del card */
+  background: inherit;         
 }
 
 .kanban-col > .card-body {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;              /* 👈 aquí está el scroll del contenido */
+  overflow: auto;              
   padding: 8px;
 }
 
-/* Feedback al arrastrar encima de una columna (opcional) */
+
 .kanban-col.drag-over,
 .kanban-col:hover {
   outline: 2px dashed rgba(100,108,255,.45);
   outline-offset: -6px;
 }
 
-/* Cards compactas para board */
+
 .kanban .card {
   background: #111;
   border-color: #2a2a2a;
@@ -155,7 +147,7 @@ table { width: 100%; }
   padding: 10px;
 }
 
-/* ===== Modales ===== */
+
 .modal {
   position: fixed;
   inset: 0;
@@ -178,7 +170,7 @@ table { width: 100%; }
   overflow: auto;
 }
 
-/* ===== Helpers para tema oscuro Bootstrap-like (opcional) ===== */
+
 .card {
   background-color: #0f0f0f;
   border: 1px solid #262626;
@@ -202,7 +194,7 @@ table { width: 100%; }
 .badge.text-bg-warning   { background: #5a4a00 !important; color: #ffe599 !important; }
 .badge.text-bg-success   { background: #0f3f1a !important; color: #b7f7c0 !important; }
 
-/* ===== Scrollbars bonitos (opcional) ===== */
+
 * {
   scrollbar-width: thin;
   scrollbar-color: #3d3d3d transparent;

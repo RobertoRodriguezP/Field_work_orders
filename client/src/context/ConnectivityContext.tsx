@@ -1,17 +1,17 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import api, { bindNetworkHandler } from "../api/http";
+import api from '../api/http';
 
 type ConnCtx = {
-  apiOnline: boolean;     
-  lastOkAt?: number;    
+  apiOnline: boolean;
+  lastOkAt?: number;
   checkNow: () => Promise<void>;
 };
 
 const Ctx = createContext<ConnCtx>({ apiOnline: false, checkNow: async () => {} });
 
-const OFFLINE_AFTER_MS = 2000000;    
-const PING_EVERY_MS = 2000000;    
-const CHECK_TICK_MS = 100000;      
+const OFFLINE_AFTER_MS = 2000000;
+const PING_EVERY_MS = 2000000;
+const CHECK_TICK_MS = 100000;
 
 export function ConnectivityProvider({ children }: { children: React.ReactNode }) {
   const [apiOnline, setApiOnline] = useState(false);
@@ -35,38 +35,36 @@ export function ConnectivityProvider({ children }: { children: React.ReactNode }
       markOk();
       setApiOnline(true);
     } catch {
-      console.log("CheckNow");
+      console.log("API offline");
+      setApiOnline(false);
     }
   };
 
-
   useEffect(() => {
-    bindNetworkHandler((ev) => {
-      if (ev === "ok") {
-        const now = Date.now();
-        const wasOnline = computeOnline();
-        markOk(now);
-        if (!wasOnline) setApiOnline(true);
-      } else {
-        console.log("bindNetworkHandler");
-        
-      }
-    });
+    // Eventos de red del navegador
+    window.addEventListener("online", (_ev: Event) => setApiOnline(true));
+    window.addEventListener("offline", (_ev: Event) => setApiOnline(false));
 
+    // Primer chequeo
     checkNow();
 
+    // Reevaluar estado cada X tiempo
     tickRef.current = window.setInterval(() => {
       const online = computeOnline();
       setApiOnline((prev) => (prev !== online ? online : prev));
     }, CHECK_TICK_MS);
 
-    pingRef.current = window.setInterval(() => { checkNow(); }, PING_EVERY_MS);
+    // Ping periódico a la API
+    pingRef.current = window.setInterval(() => {
+      checkNow();
+    }, PING_EVERY_MS);
 
     return () => {
       if (tickRef.current) window.clearInterval(tickRef.current);
       if (pingRef.current) window.clearInterval(pingRef.current);
+      window.removeEventListener("online", (_ev: Event) => setApiOnline(true));
+      window.removeEventListener("offline", (_ev: Event) => setApiOnline(false));
     };
-
   }, []);
 
   const value = useMemo<ConnCtx>(() => ({

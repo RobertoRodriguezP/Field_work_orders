@@ -59,25 +59,25 @@ services:
       AUTH_VALIDISSUER: "http://host.docker.internal:8080/realms/workops"
       Auth__Audience: workops-api
       Auth__RequireHttps: "false"
-      Cors__AllowedOrigins__0: http://localhost:5173
+      Cors__AllowedOrigins__0: http://localhost:8086
+      Cors__AllowedOrigins__1: http://localhost:5173
     depends_on:
       postgres:
         condition: service_healthy
       keycloak:
         condition: service_started
 
-  client:
+  workops-frontend:
     build:
       context: ./client
-      dockerfile: Dockerfile
-    container_name: workops-frontend
-    profiles: ["prod"]
-    environment:
-      VITE_API_URL: http://localhost:8085
     ports:
       - "8086:80"
     depends_on:
       - api
+    environment:
+      - VITE_API_URL=http://host.docker.internal:8085
+      - VITE_TOKEN_URL=http://host.docker.internal:8080/realms/workops/protocol/openid-connect/token
+      - VITE_CLIENT_ID=workops-spa
 
 volumes:
   pg_data:
