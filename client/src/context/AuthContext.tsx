@@ -43,12 +43,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; };
   }, [apiOnline]);
 
-  const login  = () => { window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/login`;  };
+  const login = () => {
+    const guest: Me = {
+      email: "guest@local",
+      roles: []        // requerido por tu tipo Me
+    };
+    setMe(guest);
+  };
+
   const logout = () => { window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/logout`; };
 
   const value = useMemo(() => ({
     me, loading, apiOnline,
-    login, logout,
+    login, 
+    logout,
     isGuest: !apiOnline || !me,
     has: (role: string) => !!me?.roles?.includes(role),
   }), [me, loading, apiOnline]);

@@ -10,10 +10,17 @@ import { useConnectivity } from '../context/ConnectivityContext';
 export default function LoginPage() {
   const { register, handleSubmit } = useForm<Form>();
   const { login } = useAuth();
+  const { apiOnline } = useConnectivity();
+  const navigate = useNavigate();
 
-  const onSubmit = (data: Form) => {
-    const fakeJwt = 'demo.jwt.token';
-    login(fakeJwt, { id: data.email, email: data.email, name: data.name || 'User' });
+  //const onSubmit = (data: Form) => {
+  //  const fakeJwt = 'demo.jwt.token';
+  //  login(fakeJwt, { id: data.email, email: data.email, name: data.name || 'User' });
+  //  localStorage.setItem("guest_email", data.email);
+  //  navigate("/");
+  //};
+
+  const onSubmit = () => {    login();
   };
 
   return (
@@ -36,7 +43,15 @@ export default function LoginPage() {
                     <label className="form-label">Name</label>
                     <input className="form-control form-control-lg" type="text" {...register('name')} />
                   </div>
-                  <button className="btn btn-primary btn-lg w-100" type="submit">Continue</button>
+                  <div className="d-grid gap-2">
+                  <button className="btn btn-secondary btn-lg w-100" type="submit">Entrar como invitado</button>
+                  <button className="btn btn-primary btn-lg w-100"
+                      type="button"
+                      onClick={() => login()}
+                      disabled={!apiOnline}
+                      title={apiOnline ? "Keycloak via C#" : "Servidor no disponible"}>
+                      Continuar con proveedor (OIDC)</button>
+                  </div>
                   <p className="mt-3 text-secondary">
                     ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
                   </p>

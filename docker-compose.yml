@@ -66,6 +66,18 @@ services:
       keycloak:
         condition: service_started
 
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: workops-frontend
+    profiles: ["prod"]
+    environment:
+      VITE_API_URL: http://localhost:8085
+    ports:
+      - "8086:80"
+    depends_on:
+      - api
 
 volumes:
   pg_data:

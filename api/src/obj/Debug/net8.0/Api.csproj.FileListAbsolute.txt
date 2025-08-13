@@ -50,3 +50,4 @@ C:\Users\United Union\Documents\1.Personal\Proyectos Personales\Field_work_order
 C:\Users\United Union\Documents\1.Personal\Proyectos Personales\Field_work_orders\api\src\obj\Debug\net8.0\Api.pdb
 C:\Users\United Union\Documents\1.Personal\Proyectos Personales\Field_work_orders\api\src\obj\Debug\net8.0\Api.genruntimeconfig.cache
 C:\Users\United Union\Documents\1.Personal\Proyectos Personales\Field_work_orders\api\src\obj\Debug\net8.0\ref\Api.dll
+C:\Users\United Union\Documents\1.Personal\Proyectos Personales\Field_work_orders\api\src\obj\Debug\net8.0\Api.sourcelink.json

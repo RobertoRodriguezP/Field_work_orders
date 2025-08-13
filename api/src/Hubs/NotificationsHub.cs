@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Api.Hubs;
+namespace Api.Hubs { public class NotificationsHub : Hub { } }
 
 [Authorize]
 public class NotificationsHub : Hub

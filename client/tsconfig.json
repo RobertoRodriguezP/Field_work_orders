@@ -1,8 +1,18 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["*"]
-    }
-  }
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",              // <- recomendado con Vite
+    "jsx": "react-jsx",                         // <- para .tsx
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,                       // <- evita ruido de node_modules
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["node"],                          // <- Buffer, __dirname, node:*
+    "noEmit": true,
+    "strict": true
+  },
+  "include": ["src", "vite.config.ts"]
 }

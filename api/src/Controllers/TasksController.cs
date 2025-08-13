@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+
 using Api.Authorization;
 using Api.Data;
 using Api.Data.Entities;
 using Api.Hubs;
 
 namespace Api.Controllers;
+
 
 [ApiController]
 [Route("api/tasks")]
@@ -27,7 +29,7 @@ public class TasksController : ControllerBase
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(t => t.Status == status);
         var total = await q.CountAsync();
         var items = await q.OrderByDescending(t => t.Id)
-                           .Skip(Math.Max(0,(page-1)*pageSize))
+                           .Skip(Math.Max(0, (page - 1) * pageSize))
                            .Take(pageSize)
                            .ToListAsync();
         return Ok(new { total, items });
@@ -55,14 +57,20 @@ public class TasksController : ControllerBase
     [Authorize(Policy = Policies.CanWrite)]
     public async Task<IActionResult> Update(int id, [FromBody] TaskItem input)
     {
-        var e = await _db.Tasks.FindAsync(id);
-        if (e is null) return NotFound();
-        e.Title = input.Title; e.Description = input.Description; e.DueDate = input.DueDate;
-        e.Status = input.Status; e.AssignedToSub = input.AssignedToSub;
+        var task = await _db.Tasks.FindAsync(id);
+        if (task == null) return NotFound();
+
+        if (input.Title is not null) task.Title = input.Title;
+        if (input.Description is not null) task.Description = input.Description;
+        if (input.DueDate.HasValue) task.DueDate = input.DueDate; 
+        if (input.Status is not null) task.Status = input.Status;
+        if (input.AssignedToSub is not null) task.AssignedToSub = input.AssignedToSub;
+
         await _db.SaveChangesAsync();
-        await _hub.Clients.All.SendAsync("status", $"Task {e.Id} updated");
         return NoContent();
     }
+
+
 
     [HttpDelete("{id:int}")]
     [Authorize(Policy = Policies.Admin)]

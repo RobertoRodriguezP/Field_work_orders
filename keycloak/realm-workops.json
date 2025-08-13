@@ -11,9 +11,17 @@
   "internationalizationEnabled": false,
   "roles": {
     "realm": [
-      { "name": "admin", "description": "Administrator role" },
-      { "name": "user", "description": "Standard user role" }
-    ]
+    {
+      "name": "admin",
+      "description": "Administrator role (composite)",
+      "composite": true,
+      "composites": {
+        "realm": ["writer", "user"]   
+      }
+    },
+    { "name": "user",   "description": "Standard user role" },
+    { "name": "writer", "description": "Can create/update tasks" }  
+  ]
   },
   "clients": [
     {
@@ -28,8 +36,8 @@
       "directAccessGrantsEnabled": true,
       "implicitFlowEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": ["http://localhost:5173/*","http://localhost:8085/swagger/oauth2-redirect.html"],
-      "webOrigins": ["http://localhost:5173","http://localhost:8085"],
+      "redirectUris": ["http://localhost:5173/*","http://localhost:8085/swagger/oauth2-redirect.html","https://oauth.pstmn.io/v1/callback"],
+      "webOrigins": ["http://localhost:5173","http://localhost:8085","https://oauth.pstmn.io"],
       "attributes": {
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "+",
@@ -50,6 +58,66 @@
       }
     ]
     },
+    {
+  "clientId": "workops-web",
+  "name": "WorkOps Web (OIDC for API)",
+  "protocol": "openid-connect",
+  "enabled": true,
+  "publicClient": false,
+  "bearerOnly": false,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "secret": "dev-secret",
+  "redirectUris": ["http://localhost:8085/signin-oidc"],
+  "webOrigins": ["http://localhost:8085","http://localhost:5173"],
+  "attributes": {
+    "pkce.code.challenge.method": "S256"
+  },
+  "defaultClientScopes": ["roles","profile","email"],
+  "protocolMappers": [
+    {
+      "name": "realm roles",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-realm-role-mapper",
+      "consentRequired": false,
+      "config": {
+        "claim.name": "roles",
+        "jsonType.label": "String",
+        "multivalued": "true",
+        "userinfo.token.claim": "true",
+        "id.token.claim": "true",
+        "access.token.claim": "true"
+      }
+    },
+    {
+      "name": "audience-workops-api",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-audience-mapper",
+      "consentRequired": false,
+      "config": {
+        "included.client.audience": "workops-api",
+        "id.token.claim": "false",
+        "access.token.claim": "true"
+      }
+    },
+    {
+      "name": "preferred_username",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-property-mapper",
+      "consentRequired": false,
+      "config": {
+        "user.attribute": "username",
+        "claim.name": "preferred_username",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    }
+  ]
+},
     {
       "clientId": "workops-api",
       "name": "WorkOps API",
@@ -110,47 +178,49 @@
     }
   ],
   "users": [
-    {
-      "username": "admin1",
-      "email": "admin1@example.com",
-      "firstName": "Admin",
-      "lastName": "One",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
-      "realmRoles": ["admin"]
-    },
-    {
-      "username": "admin2",
-      "email": "admin2@example.com",
-      "firstName": "Admin",
-      "lastName": "Two",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
-      "realmRoles": ["admin"]
-    },
-    {
-      "username": "user1",
-      "email": "user1@example.com",
-      "firstName": "User",
-      "lastName": "One",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
-      "realmRoles": ["user"]
-    },
-    {
-      "username": "user2",
-      "email": "user2@example.com",
-      "firstName": "User",
-      "lastName": "Two",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
-      "realmRoles": ["user"]
-    }
-  ],
+  {
+    "username": "admin1",
+    "email": "admin1@example.com",
+    "firstName": "Admin",
+    "lastName": "One",
+    "enabled": true,
+    "emailVerified": true,
+    "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+    "realmRoles": ["admin"],                          
+    "clientRoles": { "realm-management": ["realm-admin"] }  
+  },
+  {
+    "username": "admin2",
+    "email": "admin2@example.com",
+    "firstName": "Admin",
+    "lastName": "Two",
+    "enabled": true,
+    "emailVerified": true,
+    "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+    "realmRoles": ["admin"],
+    "clientRoles": { "realm-management": ["realm-admin"] }
+  },
+  {
+    "username": "user1",
+    "email": "user1@example.com",
+    "firstName": "User",
+    "lastName": "One",
+    "enabled": true,
+    "emailVerified": true,
+    "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+    "realmRoles": ["user", "writer"]                
+  },
+  {
+    "username": "user2",
+    "email": "user2@example.com",
+    "firstName": "User",
+    "lastName": "Two",
+    "enabled": true,
+    "emailVerified": true,
+    "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+    "realmRoles": ["user"]
+  }
+],
   "identityProviders": [
     {
       "alias": "google",

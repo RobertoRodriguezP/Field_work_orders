@@ -29,7 +29,7 @@ function StatusBadge({ s }: { s: TaskStatus }) {
 
 export default function TasksPage() {
   const { page, loading, error, filters, setFilters, refresh, create, update, remove } = useTasks();
-
+  const undef = <T,>(v: T | null | undefined): T | undefined => v ?? undefined;
   const [editing, setEditing] = useState<Task | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [view, setView] = useState<'table' | 'board'>('board'); // default: board
@@ -63,7 +63,6 @@ export default function TasksPage() {
   const total = page?.total ?? 0;
   const pageCount = Math.ceil(total / (filters.pageSize ?? 10));
 
-  // ---------- Drag & Drop helpers ----------
   const onDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('text/taskId', taskId);
     e.dataTransfer.effectAllowed = 'move';
@@ -113,12 +112,19 @@ export default function TasksPage() {
               setEditing(t);
               setShowForm(true);
               reset({
-                title: t.title,
-                description: t.description,
-                dueDate: t.dueDate?.slice(0, 10),
-                status: t.status,
-                assignedTo: t.assignedTo
-              });
+  title: t.title,
+  description: undef(t.description),
+  dueDate: undef(t.dueDate?.slice(0,10)),
+  status: t.status,
+  assignedTo: undef(t.assignedTo),
+});
+               //reset({
+               // title: t.title,
+               // description: t.description ?? undefined,
+               // dueDate: t.dueDate?.slice(0, 10) ?? undefined,
+               // status: t.status,
+               // assignedTo: t.assignedTo ?? undefined
+              //});
             }}
           >
             Edit
@@ -271,12 +277,19 @@ export default function TasksPage() {
                             setEditing(t);
                             setShowForm(true);
                             reset({
-                              title: t.title,
-                              description: t.description,
-                              dueDate: t.dueDate?.slice(0, 10),
-                              status: t.status,
-                              assignedTo: t.assignedTo
-                            });
+  title: t.title,
+  description: undef(t.description),
+  dueDate: undef(t.dueDate?.slice(0,10)),
+  status: t.status,
+  assignedTo: undef(t.assignedTo),
+});
+                           //reset({
+                           // title: t.title,
+                           // description: t.description ?? undefined,
+                           // dueDate: t.dueDate?.slice(0, 10) ?? undefined,
+                           // status: t.status,
+                           // assignedTo: t.assignedTo ?? undefined
+                            //});
                           }}
                         >
                           Edit
