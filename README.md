@@ -1,36 +1,36 @@
 # WorkOps - Field Work Orders
 
-Aplicación completa para gestión de órdenes de trabajo, con autenticación vía **Keycloak**, API backend, frontend en **React + TypeScript** y base de datos **PostgreSQL** en contenedores Docker.
+A complete application for managing field work orders, featuring authentication via **Keycloak**, a backend API, a **React + TypeScript** frontend, and a **PostgreSQL** database running in Docker containers.
 
-## 📦 Estructura del proyecto
+## 📦 Project Structure
 
 ```
 .
-├── api/                 # Backend (.NET o Node.js)
+├── api/                 # Backend (.NET or Node.js)
 ├── client/              # Frontend (React + Vite + TS)
-├── docker-compose.yml   # Orquestación de servicios
-├── Dockerfile           # Build del frontend
-├── .env.example         # Variables de entorno de ejemplo
-└── pg_data/             # Volumen persistente de Postgres (ignorado en git)
+├── docker-compose.yml   # Service orchestration
+├── Dockerfile           # Frontend build
+├── .env.example         # Sample environment variables
+└── pg_data/             # Persistent Postgres volume (gitignored)
 ```
 
-## 🚀 Servicios
+## 🚀 Services
 
-- **PostgreSQL** — Base de datos persistente.
-- **Keycloak** — Identity Provider para OIDC/OAuth2.
-- **API** — Backend que expone endpoints protegidos.
-- **Frontend** — SPA en React + Vite + TS.
-- **Adminer** — Cliente SQL web para administrar Postgres.
+- **PostgreSQL** — Persistent database.
+- **Keycloak** — Identity Provider for OIDC/OAuth2.
+- **API** — Backend exposing protected endpoints.
+- **Frontend** — React + Vite + TS SPA.
+- **Adminer** — Web-based SQL client for managing Postgres.
 
-## 🛠 Requisitos
+## 🛠 Requirements
 
-- [Docker](https://www.docker.com/get-started) y Docker Compose
-- Node.js 20+ (solo si quieres levantar el frontend localmente)
-- .NET 8 SDK (si el backend es .NET y quieres correrlo local)
+- Docker and Docker Compose
+- Node.js 20+ (only if you want to run the frontend locally)
+- .NET 8 SDK (if backend is .NET and you want to run it locally)
 
-## ⚙️ Variables de entorno
+## ⚙️ Environment Variables
 
-Crea un archivo `.env` en la raíz siguiendo `.env.example` y ajusta:
+Create a `.env` file in the root directory based on `.env.example` and adjust:
 
 ```env
 POSTGRES_DB=workops
@@ -41,41 +41,41 @@ VITE_TOKEN_URL=http://localhost:8080/realms/workops/protocol/openid-connect/toke
 VITE_CLIENT_ID=workops-spa
 ```
 
-## ▶️ Levantar el proyecto con Docker
+## ▶️ Start the project with Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-Esto inicia:
-- **workops-postgres** en `localhost:5432`
-- **workops-keycloak** en `localhost:8080`
-- **API** en `localhost:8085`
-- **Frontend** en `localhost:8086`
-- **Adminer** en `localhost:8081`
+This starts:
+- **workops-postgres** at `localhost:5432`
+- **workops-keycloak** at `localhost:8080`
+- **API** at `localhost:8085`
+- **Frontend** at `localhost:8086`
+- **Adminer** at `localhost:8081`
 
-⚠️ La primera vez, espera a que `workops-postgres` esté `healthy` antes de que la API se conecte.
+⚠️ On first run, wait for `workops-postgres` to be `healthy` before the API can connect.
 
-## 🖥 Acceso
+## 🖥 Access
 
-- **Frontend**: http://localhost:8086
-- **Keycloak Admin**: http://localhost:8080
-- **Adminer**: http://localhost:8081
+- **Frontend**: http://localhost:8086  
+- **Keycloak Admin**: http://localhost:8080  
+- **Adminer**: http://localhost:8081  
 
-## 🔑 Credenciales iniciales
+## 🔑 Initial Credentials
 
 **Keycloak**:
-- Usuario: `admin`
-- Contraseña: `admin`
+- Username: `admin`
+- Password: `admin`
 
 **API**:
 - Realm: `workops`
 - Client ID: `workops-spa`
 
-## 🧪 Login desde Postman
+## 🧪 Login from Postman
 
-1. Obtener token:
-   ```
+1. Get a token:
+   ```http
    POST http://localhost:8080/realms/workops/protocol/openid-connect/token
    Content-Type: application/x-www-form-urlencoded
 
@@ -85,23 +85,81 @@ Esto inicia:
    password=Passw0rd!
    ```
 
-2. Usar el `access_token` para consumir API:
-   ```
+2. Use the `access_token` to call the API:
+   ```http
    GET http://localhost:8085/api/auth/me
    Authorization: Bearer <access_token>
    ```
 
-## 🛑 Parar los servicios
+---
+
+## 📚 API Docs with Swagger (OpenAPI)
+
+The backend exposes interactive API documentation via **Swagger UI**.
+
+- **Swagger UI:** http://localhost:8085/swagger  
+- **OpenAPI JSON:** http://localhost:8085/swagger/v1/swagger.json
+
+If you run locally (without Docker), Swagger is enabled by default in **Development**. In Docker, it is also available by default at the route above.
+
+### How to add/verify Swagger (Swashbuckle) in .NET 8
+
+> If your API already shows `/swagger`, you can skip this section.
+
+1. Add the packages:
+   ```bash
+   dotnet add api package Swashbuckle.AspNetCore
+   ```
+
+2. In `Program.cs` add services and middleware:
+   ```csharp
+   // builder.Services
+   builder.Services.AddEndpointsApiExplorer();
+   builder.Services.AddSwaggerGen();
+
+   var app = builder.Build();
+
+   // App pipeline
+   app.UseSwagger();
+   app.UseSwaggerUI();
+   ```
+
+3. (Optional) Annotate your endpoints with XML comments or attributes to enrich the docs.
+
+### Import into Postman
+
+- In Postman: **File → Import → Link** and paste `http://localhost:8085/swagger/v1/swagger.json`, or import the downloaded `swagger.json` file directly.
+- You can also generate client SDKs using tools like **NSwag** or **OpenAPI Generator** if needed.
+
+---
+
+## 🛑 Stop the services
 
 ```bash
 docker compose down
 ```
 
-Para borrar también los datos de Postgres:
+To also remove Postgres data:
 ```bash
 docker compose down -v
 ```
 
-## 📜 Licencia
+## 🧪 Testing & Coverage (optional)
 
-Este proyecto está bajo licencia MIT.
+If you set up unit tests with **xUnit + Moq**, you can validate coverage using **Coverlet**:
+
+```bash
+dotnet test   /p:CollectCoverage=true   /p:CoverletOutput=TestResults/coverage.xml   /p:CoverletOutputFormat=cobertura   /p:Threshold=80   /p:ThresholdType=line   /p:ThresholdStat=total   /p:FailWhenThresholdNotMet=true
+```
+
+Generate a local HTML report:
+```bash
+dotnet tool install -g dotnet-reportgenerator-globaltool
+reportgenerator -reports:"**/TestResults/coverage.xml" -targetdir:"CoverageReport" -reporttypes:"Html"
+```
+
+Open `CoverageReport/index.html`.
+
+## 📜 License
+
+This project is licensed under the MIT License.
